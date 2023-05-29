@@ -8,6 +8,9 @@ const cors = require('cors')
 const connectDB = require('./database/database')
 const mongoose = require('mongoose')
 
+const blogsData = require('./utilities/blogsData')
+const Blogs = require('./models/Blogs')
+
 const db = mongoose.connection
 
 const userController = require('./controllers/users')
@@ -37,7 +40,11 @@ app.use(express.urlencoded({ extended: false }))
 app.use('/blogs', blogsController)
 app.use('/user', userController)
 
-
+// Seed
+app.get('/seed', async (req, res) => {
+    await Blogs.deleteMany({})
+    await Blogs.insertMany(blogsData)
+})
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
