@@ -44,6 +44,7 @@ app.use('/user', userController)
 app.get('/seed', async (req, res) => {
     await Blogs.deleteMany({})
     await Blogs.insertMany(blogsData)
+    res.send('done')
 })
 
 app.listen(port, () => {
