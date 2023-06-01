@@ -5,11 +5,17 @@ require('dotenv').config()
 const express = require('express')
 const logger = require('morgan')
 const cors = require('cors')
+const bodyParser = require('body-parser')
 const connectDB = require('./database/database')
 const mongoose = require('mongoose')
 
+
 const blogsData = require('./utilities/blogsData')
+const userData = require('./utilities/userData')
+
 const Blogs = require('./models/Blogs')
+const User = require('./models/Users')
+
 
 const db = mongoose.connection
 
@@ -31,7 +37,10 @@ db.on('disconnected', () => console.log('mongo disconnected'))
 app.use(logger('dev'))
 app.use(express.json())
 
-app.use(cors())
+
+app.use(express.urlencoded())
+
+app.use(cors({ origin: '*' }))
 
 app.use(express.urlencoded({ extended: false }))
 
@@ -44,6 +53,8 @@ app.use('/user', userController)
 app.get('/seed', async (req, res) => {
     await Blogs.deleteMany({})
     await Blogs.insertMany(blogsData)
+    await User.deleteMany({})
+    await User.insertMany(userData)
     res.send('done')
 })
 

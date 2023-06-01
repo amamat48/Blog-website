@@ -16,14 +16,17 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ message: 'User already exists' })
         }
         // Create a new user
-        const hashedPassword = await bcrypt.hash(password, 10)
+        console.log(req.body)
+        const saltRounds = 10
+        const hashedPassword = await bcrypt.hash(password, saltRounds)
+        console.log(hashedPassword)
         const newUser = await User.create({ name, email, password: hashedPassword })
         // Generate a token
-        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET)
+        const token = jwt.sign({ newUser }, process.env.TOKEN_SECRET)
         res.json(token)
     } catch (err) {
         res.status(500).json({ message: 'Server error' })
-        console.eroor(err)
+        console.error(err)
     }
 })
 
@@ -33,16 +36,21 @@ router.post('/login', async (req, res) => {
         // Find the user by email
         const user = await User.findOne({ email })
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' })
+            return res.status(400).json({ message: 'User not Found' })
         }
+        console.log(user)
         // Check the password
         const isMatch = await bcrypt.compare(password, user.password)
+        console.log(isMatch)
         if (!isMatch) {
+
             return res.status(400).json({ message: 'Invalid credentials' })
+
         }
         // Generate a token
-        const token = jwt.sign({ userId: user._id }, process.env.TOKEN_SECRET)
-        res.json(token)
+        const token = jwt.sign({ user }, process.env.TOKEN_SECRET);
+        const decodedUser = jwt.decode(token); // Decode the token to extract the user data
+        res.json({ token, user: decodedUser })
     } catch (err) {
         res.status(500).json({ message: 'Server error' })
         console.error(err)
@@ -56,7 +64,7 @@ router.delete('/:id', async (req, res) => {
         res.json('Succesfully Deleted')
     } catch (err) {
         res.status(500).json('Error deleting')
-        console.eroor(err)
+        console.error(err)
     }
 })
 

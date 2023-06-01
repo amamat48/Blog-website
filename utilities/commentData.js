@@ -1,0 +1,3 @@
+const commentData = [
+    {entry}
+]

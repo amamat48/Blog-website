@@ -23,7 +23,13 @@ const userSchema = new Schema(
             trim: true,
             minLength: 5,
             required: true
-          }
+          },
+          comments: [{
+              type: Schema.Types.ObjectId,
+              ref: 'Comments'
+          }]
+
+
         }, {
           toJSON: {
             transform: function(doc, ret) {
@@ -33,14 +39,6 @@ const userSchema = new Schema(
           }
 
 })
-
-userSchema.pre('save', async function(next) {
-    // 'this' is the user doc
-    if (!this.isModified('password')) return next();
-    // update the password with the computed hash
-    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
-    return next();
-  })
 
 const User = model('User', userSchema)
 
