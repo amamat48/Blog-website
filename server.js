@@ -23,6 +23,7 @@ const db = mongoose.connection
 const userController = require('./controllers/users')
 const blogsController = require('./controllers/blogs')
 
+// const PORT = process.env.PORT || 3001
 const PORT = process.env.PORT || 3030
 
 const app = express()
