@@ -1,5 +1,5 @@
 const blogsData = [
-    {title: 'First Post', entry: 'I feel like today is going to be a good day'}
+    {title: 'First Post', entry: 'I feel like today is going to be a good day', comments:[]}
 ]
 
 module.exports = blogsData

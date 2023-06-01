@@ -50,6 +50,22 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.put('/edit/:id', async (req, res) => {
+    try {
+        const blogId = req.params.id
+        const { title, entry } = req.body
+
+        const blog = await Blogs.findByIdAndUpdate(
+            blogId,
+            { title, entry },
+            { new: true }
+        )
+        res.json(blog)
+    } catch (err) {
+        res.status(500).json(err)
+    }
+})
+
 //New handled by react
 
 // Delete
@@ -70,8 +86,7 @@ router.put('/:id', async (req, res) => {
     try {
         const blogId = req.params.id
         const { entry } = req.body
-        console.log(`This is the id ${blogId}`)
-        console.log(`This is the body ${req.body} and the entry ${entry}`)
+
         const newComment = await Comment.create({ entry })
 
         const blog = await Blogs.findByIdAndUpdate(
@@ -104,7 +119,13 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const Blog = await Blogs.findById(req.params.id)
-        res.json(Blog)
+        const comments = []
+        for (let i = 0; i < Blog.comments.length; i ++) {
+            const comment = await Comment.findById(Blog.comments[i])
+            console.log(comment)
+            comments.push(comment)
+        }
+        res.json({  Blog, comments })
     } catch (err) {
         res.status(500).json(err)
         console.log(err)

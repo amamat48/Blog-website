@@ -15,6 +15,7 @@ const userData = require('./utilities/userData')
 
 const Blogs = require('./models/Blogs')
 const User = require('./models/Users')
+const Comment = require('./models/Users')
 
 
 const db = mongoose.connection
