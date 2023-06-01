@@ -21,7 +21,7 @@ const Comment = require('./models/Users')
 const db = mongoose.connection
 
 const userController = require('./controllers/users')
-const blogsController = require('./controllers/Blogs')
+const blogsController = require('./controllers/blogs')
 
 const PORT = process.env.PORT || 3030
 
