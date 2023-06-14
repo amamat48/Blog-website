@@ -4,7 +4,13 @@ const router = express.Router()
 const Blogs = require('../models/Blogs')
 const Comment = require('../models/Comments')
 
+const requireAuth = require('../middleware/requireAuth')
+
 // INDUCES
+
+// auth middleware
+
+router.use(requireAuth)
 
 // Index
 router.get('/', async (req, res) => {

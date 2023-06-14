@@ -27,6 +27,10 @@ const userSchema = new Schema(
           comments: [{
               type: Schema.Types.ObjectId,
               ref: 'Comments'
+          }],
+          blogs: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Blogs'
           }]
 
 
