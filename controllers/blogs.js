@@ -3,6 +3,7 @@ const router = express.Router()
 
 const Blogs = require('../models/Blogs')
 const Comment = require('../models/Comments')
+const User = require('../models/Users')
 
 const requireAuth = require('../middleware/requireAuth')
 
@@ -16,54 +17,63 @@ router.use(requireAuth)
 router.get('/', async (req, res) => {
     try {
 
-        const allBlogs = await Blogs.find({})
+        const allBlogs = await Blogs.find({}) // find all blogs
 
         const blogsWithComments = []
 
-        for (let i = 0; i < allBlogs.length; i++){
 
-            const blog = allBlogs[i]
+        for (let i = 0; i < allBlogs.length; i++){ // loop through blog array
+
+            const blog = allBlogs[i] // get every blog
 
             const comments = []
 
-            console.log(`This is the blog ${blog}`)
+            const userId = blog.user // get the id of the user that made the blog
 
-            for (let j = 0; j < blog.comments.length; j++){
+            const user = await User.findById(userId) // get the user from userId
 
-            const commentId = blog.comments[j]
 
-            const foundComment = await Comment.findById(commentId)
 
-            console.log(`This is the found comments ${foundComment}`)
-            console.log(`These are the ids ${commentId}`)
+            for (let j = 0; j < blog.comments.length; j++){ // loop through comments arrya on blogs object
 
-            comments.push(foundComment)
+            const commentId = blog.comments[j] // get the id
+
+            const foundComment = await Comment.findById(commentId) // find comment in database
+
+
+            comments.push( // push the comment with the name of the user in the database into the comments array
+                {
+                comment: foundComment,
+                user: user.name
+                }
+                )
             }
-            const blogWithComments = {
+            const blogWithComments = { // initialize new object
                  blog,
-                 comments
+                 comments,
+                 user // add user object
             }
-            blogsWithComments.push(blogWithComments)
+            blogsWithComments.push(blogWithComments) // push object to array
         }
 
 
-
-        res.json(blogsWithComments)
+        res.json(blogsWithComments) // send array with the blogs and the comments
 
     } catch (err) {
         res.status(500).json(err)
         console.log(err)
     }
 })
-
+//Updated the blog itself
 router.put('/edit/:id', async (req, res) => {
     try {
         const blogId = req.params.id
         const { title, entry } = req.body
 
+        console.log(user)
         const blog = await Blogs.findByIdAndUpdate(
             blogId,
-            { title, entry },
+            { title, entry, },
             { new: true }
         )
         res.json(blog)
@@ -87,7 +97,7 @@ router.delete('/:id', async (req, res) => {
 })
 
 // Update
-
+// Updating for the new comments
 router.put('/:id', async (req, res) => {
     try {
         const blogId = req.params.id
@@ -110,8 +120,17 @@ router.put('/:id', async (req, res) => {
 
 // Create
 router.post('/', async (req, res) => {
+
+    const { user } = req.body
+    console.log(user)
     try {
+
         const newBlog = await Blogs.create(req.body)
+        await User.findByIdAndUpdate(
+            user,
+            { $push: {blogs: newBlog._id}},
+            { new: true })
+
         res.json(newBlog)
     } catch (err) {
         res.status(500).json(err)
