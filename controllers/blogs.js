@@ -22,41 +22,52 @@ router.get('/', async (req, res) => {
         const blogsWithComments = []
 
 
-        for (let i = 0; i < allBlogs.length; i++){ // loop through blog array
+        for (let i = 0; i < allBlogs.length; i++) { // loop through blog array
 
             const blog = allBlogs[i] // get every blog
 
             const comments = []
 
-            const userId = blog.user // get the id of the user that made the blog
+            let userId
 
-            const user = await User.findById(userId) // get the user from userId
+            let user
 
-
-
-            for (let j = 0; j < blog.comments.length; j++){ // loop through comments arrya on blogs object
-
-            const commentId = blog.comments[j] // get the id
-
-            const foundComment = await Comment.findById(commentId) // find comment in database
+            if (blog.user) {
+                userId = blog.user
+                user = await User.findById(userId) // get the user from userId
+            }
 
 
-            comments.push( // push the comment with the name of the user in the database into the comments array
-                {
-                comment: foundComment,
-                user: user.name
+
+            for (let j = 0; j < blog.comments.length; j++) { // loop through comments arrya on blogs object
+
+                const commentId = blog.comments[j] // get the id
+
+                const foundComment = await Comment.findById(commentId) // find comment in database
+
+                const commentObject = {
+                    comment: foundComment
                 }
-                )
+
+                if (user) {
+                    commentObject.user = user.name
+                }
+
+                console.log(commentObject)
+
+                comments.push(commentObject)
             }
+
             const blogWithComments = { // initialize new object
-                 blog,
-                 comments,
-                 user // add user object
+                blog,
+                comments,
+                user
             }
+
             blogsWithComments.push(blogWithComments) // push object to array
         }
 
-
+        console.log(blogsWithComments)
         res.json(blogsWithComments) // send array with the blogs and the comments
 
     } catch (err) {
@@ -70,10 +81,9 @@ router.put('/edit/:id', async (req, res) => {
         const blogId = req.params.id
         const { title, entry } = req.body
 
-        console.log(user)
         const blog = await Blogs.findByIdAndUpdate(
             blogId,
-            { title, entry, },
+            { title, entry },
             { new: true }
         )
         res.json(blog)
@@ -101,15 +111,21 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const blogId = req.params.id
-        const { entry } = req.body
 
-        const newComment = await Comment.create({ entry })
+        const commentData = req.body
+
+        console.log(`this is the comment data ${commentData}`)
+
+        const newComment = await Comment.create({
+            entry: commentData.entry,
+            user: commentData.user
+         })
 
         const blog = await Blogs.findByIdAndUpdate(
             blogId,
-            { $push: { comments: newComment._id } }, // pushes the new destination to the array in the database
+            { $push: { comments: newComment._id } }, // pushes the new comment to the array in the database
             { new: true }
-            )
+        )
         console.log(`This is the blog data ${blog}`)
         res.json(blog)
     } catch (err) {
@@ -128,7 +144,7 @@ router.post('/', async (req, res) => {
         const newBlog = await Blogs.create(req.body)
         await User.findByIdAndUpdate(
             user,
-            { $push: {blogs: newBlog._id}},
+            { $push: { blogs: newBlog._id } },
             { new: true })
 
         res.json(newBlog)
@@ -145,12 +161,12 @@ router.get('/:id', async (req, res) => {
     try {
         const Blog = await Blogs.findById(req.params.id)
         const comments = []
-        for (let i = 0; i < Blog.comments.length; i ++) {
+        for (let i = 0; i < Blog.comments.length; i++) {
             const comment = await Comment.findById(Blog.comments[i])
             console.log(comment)
             comments.push(comment)
         }
-        res.json({  Blog, comments })
+        res.json({ Blog, comments })
     } catch (err) {
         res.status(500).json(err)
         console.log(err)
